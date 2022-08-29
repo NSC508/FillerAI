@@ -1,13 +1,15 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <unordered_set>
 #include "game.h"
+#include <ctime>
 
 using namespace std;    
 
 Game::Game(bool isRandom) {
-    this->playerOneProp = new vector<int>;
-    this->playerTwoProp = new vector<int>;
+    this->playerOneProp = new unordered_set<int>;
+    this->playerTwoProp = new unordered_set<int>;
     board = new int[BOARD_SIZE * BOARD_SIZE];
     this->colors = new vector<int>;
     for (int i = 0; i < NUM_OF_COLORS; i++) {
@@ -15,6 +17,10 @@ Game::Game(bool isRandom) {
     }
 
     if (isRandom) {
+        // for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        //     board[i] = -1;
+        // }
+        srand(time(0));
         for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
             board[i] = rand() % (NUM_OF_COLORS);
         }
@@ -28,11 +34,11 @@ Game::Game(bool isRandom) {
     }
 
     //add bottom left to the playerOneProp list
-    playerOneProp->push_back((BOARD_SIZE * (BOARD_SIZE - 1)) - 1);
+    playerOneProp->insert((BOARD_SIZE * BOARD_SIZE) - (BOARD_SIZE));
     //add top right to the plyerTwoProp list
-    playerTwoProp->push_back(BOARD_SIZE - 1);
+    playerTwoProp->insert(BOARD_SIZE - 1);
 
-    playerOneColor = board[(BOARD_SIZE * (BOARD_SIZE - 1)) - 1];
+    playerOneColor = board[(BOARD_SIZE * BOARD_SIZE) - (BOARD_SIZE)];
     playerTwoColor = board[BOARD_SIZE - 1];
     
 }
@@ -73,66 +79,98 @@ int Game::getWinner() {
     return 0;
 }
 
-// int* Game::score() {
-//     int score[] = {this->playerOneProp->size(), this->playerTwoProp->size()};
-//     return score;
-// }
-
 void Game::makeMove(int color, bool isPlayerOne) {
-    vector<int>* desiredProp;
+    unordered_set<int>* desiredProp;
     if (isPlayerOne) {
-        desiredProp = this->playerOneProp;
+        desiredProp = playerOneProp;
         playerOneColor = color;
     } else {
-        desiredProp = this->playerTwoProp;   
+        desiredProp = playerTwoProp;
         playerTwoColor = color;
     } 
 
-    for (auto &i : *desiredProp) {
+    unordered_set<int> values;
+    for (int8_t i : *desiredProp) {
         //top
         if (i - BOARD_SIZE > 0) {
             if (board[i - BOARD_SIZE] == color) {
-                desiredProp->push_back(i - BOARD_SIZE);
+                values.insert(i - BOARD_SIZE);
             }
         }
         //bottom
         if (i + BOARD_SIZE < (BOARD_SIZE * BOARD_SIZE)) {
             if (board[i + BOARD_SIZE] == color) {
-                desiredProp->push_back(i + BOARD_SIZE);
+                values.insert(i + BOARD_SIZE);
             }
         }
         //left
-        if (((i - 1) / BOARD_SIZE) != (i / BOARD_SIZE)) {
+        if (((i - 1) / BOARD_SIZE) == (i / BOARD_SIZE) && (i - 1 >= 0)) {
             if (board[i - 1] == color) {
-                desiredProp->push_back(i - 1);
+                values.insert(i - 1);
             }
         }
         //right
-        if (((i + 1) / BOARD_SIZE) != (i / BOARD_SIZE)) {
+        if (((i + 1) / BOARD_SIZE) == (i / BOARD_SIZE) && i < BOARD_SIZE * BOARD_SIZE) {
             if (board[i + 1] == color) {
-                desiredProp->push_back(i + 1);
+                values.insert(i + 1);
             }
         }
+    }
 
-        i = color;
+    for (int8_t i : values) {
+        desiredProp->insert(i);
+    }
+
+    for (int8_t i : *desiredProp) {
+        board[i] = color;
     }
 }    
 
-vector<int>* Game::generateMoves() {
+unordered_set<int> Game::generateMoves() {
     //return all integers in COLOR except playerOneColor and playerTwoColor
-    vector<int>* moves = new vector<int>;
+    unordered_set<int> moves;
     for (int i = 0; i < NUM_OF_COLORS; i++) {
-        moves->push_back(i);
+        if (i != playerOneColor && i != playerTwoColor) {
+            moves.insert(i);
+        }
     }
-    vector<int>::iterator it;
-    it = moves->begin() + playerOneColor;
-    moves->erase(it);
-
-    it = moves->begin() + playerTwoColor;
-    moves->erase(it);
-
     return moves;
 }
+
+// unordered_set<int> Game::generateColors(int i) {
+//     //return set of colors that are possible to place on the board
+//     vector<int> colors;
+//     for (int i = 0; i < NUM_OF_COLORS; i++) {
+//         colors.push_back(i);
+//     }
+
+//     //top
+//     if (i - BOARD_SIZE > 0) {
+//         if (board[i - BOARD_SIZE] == color) {
+//             values.insert(i - BOARD_SIZE);
+//         }
+//     }
+//     //bottom
+//     if (i + BOARD_SIZE < (BOARD_SIZE * BOARD_SIZE)) {
+//         if (board[i + BOARD_SIZE] == color) {
+//             values.insert(i + BOARD_SIZE);
+//         }
+//     }
+//     //left
+//     if (((i - 1) / BOARD_SIZE) == (i / BOARD_SIZE) && (i - 1 >= 0)) {
+//         if (board[i - 1] == color) {
+//             values.insert(i - 1);
+//         }
+//     }
+//     //right
+//     if (((i + 1) / BOARD_SIZE) == (i / BOARD_SIZE) && i < BOARD_SIZE * BOARD_SIZE) {
+//         if (board[i + 1] == color) {
+//             values.insert(i + 1);
+//         }
+//     }
+
+//     return moves;
+// }
 
 void Game::printBoard() {
     for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {

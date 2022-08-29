@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
 
@@ -11,8 +12,8 @@ class Game {
         const int NUM_OF_COLORS = 6;
         // Black, Red, Purple, Green, Blue, Yellow
 
-        vector<int>* playerOneProp; 
-        vector<int>* playerTwoProp;
+        unordered_set<int>* playerOneProp; 
+        unordered_set<int>* playerTwoProp;
         int playerOneColor;
         int playerTwoColor;
         int* board;
@@ -28,11 +29,12 @@ class Game {
 
         int getWinner();
 
-        int* score();
+        // int* score();
 
         void makeMove(int color, bool isPlayerOne);   
 
-        vector<int>* generateMoves();
+        unordered_set<int> generateMoves();
+        //unordered_set<int> generateColors(int i);
 
         void printBoard();
 };
