@@ -68,6 +68,7 @@ Game::~Game() {
     colors = nullptr;
 }
 
+
 int Game::getWinner() {
     if (gameIsOver()) {
         if (this->playerOneProp->size() > this->playerTwoProp->size()) {
