@@ -8,20 +8,23 @@ using namespace std;
 
 class Game {
     public: 
-        const int BOARD_SIZE = 8;
+        //const int BOARD_SIZE = 8;
+        const static int BOARD_WIDTH = 8;
+        const static int BOARD_HEIGHT = 7;
         const int NUM_OF_COLORS = 6;
         // Black, Red, Purple, Green, Blue, Yellow
 
-        unordered_set<int>* playerOneProp; 
-        unordered_set<int>* playerTwoProp;
+        unordered_set<int> playerOneProp; 
+        unordered_set<int> playerTwoProp;
         int playerOneColor;
         int playerTwoColor;
-        int* board;
-        vector<int>* colors;
+
+        int board[BOARD_WIDTH * BOARD_HEIGHT];
+        vector<int> colors;
         
         Game(bool isRandom);
         
-        Game(const Game &rhs);
+        Game(const Game& rhs);
 
         ~Game();
 

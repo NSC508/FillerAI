@@ -8,70 +8,62 @@
 using namespace std;    
 
 Game::Game(bool isRandom) {
-    this->playerOneProp = new unordered_set<int>;
-    this->playerTwoProp = new unordered_set<int>;
-    board = new int[BOARD_SIZE * BOARD_SIZE];
-    this->colors = new vector<int>;
+    //this->playerOneProp = new unordered_set<int>;
+    //this->playerTwoProp = new unordered_set<int>;
+    //this->colors = new vector<int>;
     for (int i = 0; i < NUM_OF_COLORS; i++) {
-        colors->push_back(i);
+        colors.push_back(i);
     }
 
     if (isRandom) {
-        // for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        // for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
         //     board[i] = -1;
         // }
         srand(time(0));
-        for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
+        for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
             board[i] = rand() % (NUM_OF_COLORS);
         }
     } else {
         cout << "Input colors (0-" << NUM_OF_COLORS - 1 << ")" << endl;
         cout << "-----------------------" << endl;
-        for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
-            cout << "(" << i % BOARD_SIZE << "," << i / BOARD_SIZE << "): ";
+        for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
+            cout << "(" << i / BOARD_HEIGHT << "," << i % BOARD_WIDTH << "): ";
             cin >> board[i];
         }
     }
 
     //add bottom left to the playerOneProp list
-    playerOneProp->insert((BOARD_SIZE * BOARD_SIZE) - (BOARD_SIZE));
+    playerOneProp.insert((BOARD_WIDTH * BOARD_HEIGHT) - (BOARD_WIDTH));
     //add top right to the plyerTwoProp list
-    playerTwoProp->insert(BOARD_SIZE - 1);
+    playerTwoProp.insert(BOARD_WIDTH - 1);
 
-    playerOneColor = board[(BOARD_SIZE * BOARD_SIZE) - (BOARD_SIZE)];
-    playerTwoColor = board[BOARD_SIZE - 1];
+    playerOneColor = board[(BOARD_WIDTH * BOARD_HEIGHT) - (BOARD_WIDTH)];
+    playerTwoColor = board[BOARD_WIDTH - 1];
     
 }
 
 bool Game::gameIsOver() {
-    return (this->playerOneProp->size() + this->playerTwoProp->size() == (BOARD_SIZE * BOARD_SIZE));
+    return (playerOneProp.size() + playerTwoProp.size() == (BOARD_WIDTH * BOARD_HEIGHT));
 }
 
-Game::Game(const Game &rhs) {
-    this->playerOneProp = rhs.playerOneProp;
-    this->playerTwoProp = rhs.playerTwoProp;
-    this->playerOneColor = rhs.playerOneColor;
-    this->playerTwoColor = rhs.playerTwoColor;
-    this->board = rhs.board;
-    this->colors = rhs.colors;
+Game::Game(const Game& rhs) {
+    playerOneProp = rhs.playerOneProp;
+    playerTwoProp = rhs.playerTwoProp;
+    playerOneColor = rhs.playerOneColor;
+    playerTwoColor = rhs.playerTwoColor;
+    for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
+        board[i] = rhs.board[i];
+    }
+    colors = rhs.colors;
 }
 
 Game::~Game() {
-    delete playerOneProp;
-    delete playerTwoProp;
-    delete board;
-    delete colors;
-
-    playerOneProp = nullptr;
-    playerTwoProp = nullptr;
-    board = nullptr;
-    colors = nullptr;
+    //delete[] board;
 }
-
 
 int Game::getWinner() {
     if (gameIsOver()) {
-        if (this->playerOneProp->size() > this->playerTwoProp->size()) {
+        if (playerOneProp.size() > playerTwoProp.size()) {
             return 1;
         } else {
             return 2;
@@ -81,7 +73,7 @@ int Game::getWinner() {
 }
 
 void Game::makeMove(int color, bool isPlayerOne) {
-    unordered_set<int>* desiredProp;
+    unordered_set<int> desiredProp;
     if (isPlayerOne) {
         desiredProp = playerOneProp;
         playerOneColor = color;
@@ -91,40 +83,40 @@ void Game::makeMove(int color, bool isPlayerOne) {
     } 
 
     unordered_set<int> values;
-    for (int8_t i : *desiredProp) {
-        //top
-        if (i - BOARD_SIZE > 0) {
-            if (board[i - BOARD_SIZE] == color) {
-                values.insert(i - BOARD_SIZE);
-            }
+
+    //loop through the desiredProp list and add all the neighbors that are the same color to the values list
+    for (int i : desiredProp) {
+        //check the top neighbor
+        if (i - BOARD_WIDTH >= 0 && board[i - BOARD_WIDTH] == color) {
+            values.insert(i - BOARD_WIDTH);
         }
-        //bottom
-        if (i + BOARD_SIZE < (BOARD_SIZE * BOARD_SIZE)) {
-            if (board[i + BOARD_SIZE] == color) {
-                values.insert(i + BOARD_SIZE);
-            }
+        //check the bottom neighbor
+        if (i + BOARD_WIDTH < BOARD_WIDTH * BOARD_HEIGHT && board[i + BOARD_WIDTH] == color) {
+            values.insert(i + BOARD_WIDTH);
         }
-        //left
-        if (((i - 1) / BOARD_SIZE) == (i / BOARD_SIZE) && (i - 1 >= 0)) {
-            if (board[i - 1] == color) {
-                values.insert(i - 1);
-            }
+        //check the left neighbor
+        if (i % BOARD_WIDTH != 0 && board[i - 1] == color) {
+            values.insert(i - 1);
         }
-        //right
-        if (((i + 1) / BOARD_SIZE) == (i / BOARD_SIZE) && i < BOARD_SIZE * BOARD_SIZE) {
-            if (board[i + 1] == color) {
-                values.insert(i + 1);
-            }
+        //check the right neighbor
+        if ((i + 1) % BOARD_WIDTH != 0 && board[i + 1] == color) {
+            values.insert(i + 1);
         }
     }
 
     for (int8_t i : values) {
-        desiredProp->insert(i);
+        desiredProp.insert(i);
     }
 
-    for (int8_t i : *desiredProp) {
+    for (int8_t i : desiredProp) {
         board[i] = color;
     }
+    
+    if (isPlayerOne) {
+        playerOneProp = desiredProp;
+    } else {
+        playerTwoProp = desiredProp;
+    } 
 }    
 
 unordered_set<int> Game::generateMoves() {
@@ -152,7 +144,7 @@ unordered_set<int> Game::generateMoves() {
 //         }
 //     }
 //     //bottom
-//     if (i + BOARD_SIZE < (BOARD_SIZE * BOARD_SIZE)) {
+//     if (i + BOARD_SIZE < (BOARD_WIDTH * BOARD_HEIGHT)) {
 //         if (board[i + BOARD_SIZE] == color) {
 //             values.insert(i + BOARD_SIZE);
 //         }
@@ -164,7 +156,7 @@ unordered_set<int> Game::generateMoves() {
 //         }
 //     }
 //     //right
-//     if (((i + 1) / BOARD_SIZE) == (i / BOARD_SIZE) && i < BOARD_SIZE * BOARD_SIZE) {
+//     if (((i + 1) / BOARD_SIZE) == (i / BOARD_SIZE) && i < BOARD_WIDTH * BOARD_HEIGHT) {
 //         if (board[i + 1] == color) {
 //             values.insert(i + 1);
 //         }
@@ -174,8 +166,8 @@ unordered_set<int> Game::generateMoves() {
 // }
 
 void Game::printBoard() {
-    for (int i = 0; i < BOARD_SIZE * BOARD_SIZE; i++) {
-        if (i % BOARD_SIZE == 0) {
+    for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
+        if (i % BOARD_WIDTH == 0) {
             cout << "\n";
         }
         cout << board[i] << " ";
