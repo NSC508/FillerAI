@@ -29,18 +29,7 @@ Game::Game(bool isRandom) {
         for (int i = 0; i < BOARD_WIDTH * BOARD_HEIGHT; i++) {
             cout << "(" << i / BOARD_HEIGHT << "," << i % BOARD_WIDTH << "): ";
             cin >> board[i];
-        }
-    }
 
-    //add bottom left to the playerOneProp list
-    playerOneProp.insert((BOARD_WIDTH * BOARD_HEIGHT) - (BOARD_WIDTH));
-    //add top right to the plyerTwoProp list
-    playerTwoProp.insert(BOARD_WIDTH - 1);
-
-    playerOneColor = board[(BOARD_WIDTH * BOARD_HEIGHT) - (BOARD_WIDTH)];
-    playerTwoColor = board[BOARD_WIDTH - 1];
-    
-}
 
 bool Game::gameIsOver() {
     return (playerOneProp.size() + playerTwoProp.size() == (BOARD_WIDTH * BOARD_HEIGHT));
